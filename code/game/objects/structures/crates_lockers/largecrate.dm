@@ -84,3 +84,21 @@
 			S.anchored = 0
 			S.panel_open = 1
 	..()
+
+/obj/structure/largecrate/skele_stand
+	name = "hanging skeleton model crate"
+	icon_state = "lisacrate"
+
+/obj/structure/largecrate/skele_stand/attackby(obj/item/weapon/W as obj, mob/user as mob)
+	if(iscrowbar(W))
+		new /obj/structure/skele_stand(loc)
+	..()
+
+/obj/structure/largecrate/anomaly_container
+	name = "anomaly container crate"
+	icon_state = "lisacrate"
+
+/obj/structure/largecrate/anomaly_container/attackby(obj/item/weapon/W as obj, mob/user as mob)
+	if(iscrowbar(W))
+		new /obj/structure/anomaly_container(loc)
+	..()

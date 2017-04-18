@@ -1,11 +1,12 @@
 /turf
 	icon = 'icons/turf/floors.dmi'
 	plane = TURF_PLANE
-	layer = TURF_LAYER_MEME_NAME_BECAUSE_CELT_IS_A_FUCKING_RETARD
+	layer = TURF_LAYER
 	luminosity = 0
 
 	//for floors, use is_plating(), is_plasteel_floor() and is_light_floor()
 	var/intact = 1
+	var/turf_flags = 0
 
 	//properties for open tiles (/floor)
 	var/oxygen = 0
@@ -273,6 +274,9 @@
 		qdel (L)
 		L = null
 
+/turf/proc/add_dust()
+	return
+
 //Creates a new turf
 /turf/proc/ChangeTurf(var/turf/N, var/tell_universe=1, var/force_lighting_update = 0, var/allow = 1)
 	if(loc)
@@ -315,6 +319,10 @@
 
 	if(connections)
 		connections.erase_all()
+
+	if(N == /turf/space)
+		for(var/obj/effect/decal/cleanable/C in src)
+			qdel(C)//enough with footprints floating in space
 
 	if(istype(src,/turf/simulated))
 		//Yeah, we're just going to rebuild the whole thing.
@@ -482,7 +490,7 @@
 			M.take_damage(100, "brute")
 
 /turf/proc/Bless()
-	flags |= NOJAUNT
+	turf_flags |= NOJAUNT
 
 /////////////////////////////////////////////////////////////////////////
 // Navigation procs
@@ -714,3 +722,11 @@
 	.=..()
 
 	src.map_element = ME
+
+/turf/send_to_past(var/duration)
+	var/current_type = type
+	being_sent_to_past = TRUE
+	spawn(duration)
+		being_sent_to_past = FALSE
+		ChangeTurf(current_type)
+

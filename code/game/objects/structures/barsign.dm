@@ -67,6 +67,9 @@
 	if(picked.pixel_x && picked.pixel_y)
 		pixel_x = picked.pixel_x * PIXEL_MULTIPLIER
 		pixel_y = picked.pixel_y * PIXEL_MULTIPLIER
+	else if(!picked.pixel_x && !picked.pixel_y)
+		pixel_x = 0
+		pixel_y = 0
 	if(picked.desc)
 		desc = picked.desc
 	else
@@ -78,3 +81,12 @@
 		name = "Narsie Bistro"
 		desc = "The last pub before the World's End."
 		cult = 1
+		pixel_x = 0 // just to make sure.
+		pixel_y = 0
+
+/obj/structure/sign/double/barsign/emp_act()
+	icon_state = "empbarsign"
+	name = "ERROR"
+	desc = "ERROR ER0RR $R0RRO$!R41.%%!!(%$^^__+ @#F0E4#*?"
+	pixel_x = 0
+	pixel_y = 0

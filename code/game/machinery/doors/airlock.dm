@@ -527,7 +527,9 @@ About the new airlock wires panel:
 				return
 			else
 				to_chat(user, "Airlock AI control has been blocked with a firewall. Unable to hack.")
-
+		if(operating == -1) //Door is emagged
+			to_chat(user, "Unable to establish connection to airlock controller. Verify integrity of airlock circuitry.")
+			return
 	//separate interface for the AI.
 	user.set_machine(src)
 	var/t1 = text("<B>Airlock Control</B><br>\n")
@@ -679,8 +681,8 @@ About the new airlock wires panel:
 /obj/machinery/door/airlock/Cross(atom/movable/mover, turf/target, height=1.5, air_group = 0)
 	if (isElectrified())
 		if (istype(mover, /obj/item))
-			var/obj/item/i = mover
-			if (i.materials && (i.materials.getAmount(MAT_IRON) > 0))
+			var/obj/item/I = mover
+			if (I.siemens_coefficient > 0)
 				var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
 				s.set_up(5, 1, src)
 				s.start()
@@ -735,7 +737,7 @@ About the new airlock wires panel:
 				update_multitool_menu(usr)
 
 
-	if(isAdminGhost(usr) || (istype(usr, /mob/living/silicon) && src.canAIControl()))
+	if(isAdminGhost(usr) || (istype(usr, /mob/living/silicon) && src.canAIControl() && operating != -1))
 		//AI
 		//aiDisable - 1 idscan, 2 disrupt main power, 3 disrupt backup power, 4 drop door bolts, 5 un-electrify door, 7 close door, 8 door safties, 9 door speed
 		//aiEnable - 1 idscan, 4 raise door bolts, 5 electrify door for 30 seconds, 6 electrify door indefinitely, 7 open door,  8 door safties, 9 door speed
@@ -753,6 +755,7 @@ About the new airlock wires panel:
 							to_chat(usr, "<span class='warning'>Nope.</span>")
 							return 0
 						src.aiDisabledIdScanner = 1
+						investigation_log(I_WIRES, "|| IDscan disabled via robot interface by [key_name(usr)]")
 				if(2)
 					//disrupt main power
 					if(src.secondsMainPowerLost == 0)
@@ -760,6 +763,7 @@ About the new airlock wires panel:
 							to_chat(usr, "<span class='warning'>Nope.</span>")
 							return 0
 						src.loseMainPower()
+						investigation_log(I_WIRES, "|| main power disrupted via robot interface by [key_name(usr)]")
 					else
 						to_chat(usr, "Main power is already offline.")
 				if(3)
@@ -769,6 +773,7 @@ About the new airlock wires panel:
 							to_chat(usr, "<span class='warning'>Nope.</span>")
 							return 0
 						src.loseBackupPower()
+						investigation_log(I_WIRES, "|| backup power disrupted via robot interface by [key_name(usr)]")
 					else
 						to_chat(usr, "Backup power is already offline.")
 				if(4)
@@ -858,6 +863,7 @@ About the new airlock wires panel:
 							to_chat(usr, "<span class='warning'>Nope.</span>")
 							return 0
 						lights = 0
+						investigation_log(I_WIRES, "|| bolt lights disabled via robot interface by [key_name(usr)]")
 					else
 						to_chat(usr, text("Door bolt lights are already disabled!"))
 
@@ -875,6 +881,7 @@ About the new airlock wires panel:
 							to_chat(usr, "<span class='warning'>Nope.</span>")
 							return 0
 						src.aiDisabledIdScanner = 0
+						investigation_log(I_WIRES, "|| IDscan disabled via robot interface by [key_name(usr)]")
 					else
 						to_chat(usr, "The IdScan feature is not disabled.")
 				if(4)
@@ -890,6 +897,7 @@ About the new airlock wires panel:
 								return 0
 							src.locked = 0
 							to_chat(usr, "The door is now unbolted.")
+							investigation_log(I_WIRES, "|| un-bolted via robot interface by [key_name(usr)]")
 							update_icon()
 						else
 							to_chat(usr, text("Cannot raise door bolts due to power failure.<br>\n"))
@@ -944,6 +952,7 @@ About the new airlock wires panel:
 							to_chat(usr, "<span class='warning'>Nope.</span>")
 							return 0
 						safe = 1
+						investigation_log(I_WIRES, "|| safeties re-enabled via robot interface by [key_name(usr)]")
 						src.updateUsrDialog()
 					else
 						to_chat(usr, text("Firmware reports safeties already in place."))
@@ -957,6 +966,7 @@ About the new airlock wires panel:
 							to_chat(usr, "<span class='warning'>Nope.</span>")
 							return 0
 						normalspeed = 1
+						investigation_log(I_WIRES, "|| timing set to normal via robot interface by [key_name(usr)]")
 						src.updateUsrDialog()
 					else
 						to_chat(usr, text("Door timing circurity currently operating normally."))
@@ -989,6 +999,7 @@ About the new airlock wires panel:
 							to_chat(usr, "<span class='warning'>Nope.</span>")
 							return 0
 						lights = 1
+						investigation_log(I_WIRES, "|| bolt lights re-enabled via robot interface by [key_name(usr)]")
 						src.updateUsrDialog()
 					else
 						to_chat(usr, text("Door bolt lights are already enabled!"))
@@ -1327,3 +1338,17 @@ About the new airlock wires panel:
 
 /obj/machinery/door/airlock/shake()
 	return //Kinda snowflakish, to stop airlocks from shaking when kicked. I'll be refactorfing the whole thing anyways
+
+/obj/machinery/door/airlock/npc_tamper_act(mob/living/L)
+	//Open the firelocks as well, otherwise they block the way for our gremlin which isn't fun
+	for(var/obj/machinery/door/firedoor/F in get_turf(src))
+		if(F.density)
+			F.npc_tamper_act(L)
+
+	if(prob(40)) //40% - mess with wires
+		if(!panel_open)
+			togglePanelOpen(null, L)
+		if(wires)
+			wires.npc_tamper(L)
+	else //60% - just open it
+		open()

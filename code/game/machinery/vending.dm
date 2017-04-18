@@ -98,7 +98,7 @@ var/global/num_vending_terminals = 1
 	accepted_coins = list(
 			/obj/item/weapon/coin,
 			/obj/item/weapon/reagent_containers/food/snacks/chococoin
-			) 
+			)
 
 	component_parts = newlist(\
 		/obj/item/weapon/circuitboard/vendomat,\
@@ -308,6 +308,13 @@ var/global/num_vending_terminals = 1
 		to_chat(user, "You short out the product lock on \the [src]")
 		return 1
 	return -1
+
+/obj/machinery/vending/npc_tamper_act(mob/living/L)
+	if(!panel_open)
+		togglePanelOpen(null, L)
+	if(wires)
+		wires.npc_tamper(L)
+
 
 /obj/machinery/vending/proc/can_accept_voucher(var/obj/item/voucher/voucher, mob/user)
 	if(istype(voucher, /obj/item/voucher/free_item))
@@ -1244,6 +1251,7 @@ var/global/num_vending_terminals = 1
 		/obj/item/device/healthanalyzer = 5,
 		/obj/item/weapon/reagent_containers/glass/beaker = 4,
 		/obj/item/weapon/reagent_containers/dropper = 2,
+		/obj/item/stack/medical/splint = 4,
 		)
 	contraband = list(
 		/obj/item/weapon/reagent_containers/pill/tox = 3,
@@ -1288,6 +1296,7 @@ var/global/num_vending_terminals = 1
 		/obj/item/stack/medical/ointment = 2,
 		/obj/item/weapon/reagent_containers/syringe/inaprovaline = 4,
 		/obj/item/device/healthanalyzer = 1,
+		/obj/item/stack/medical/splint = 1,
 		)
 	contraband = list(
 		/obj/item/weapon/reagent_containers/syringe/antitoxin = 4,
@@ -2090,6 +2099,7 @@ var/global/num_vending_terminals = 1
 		/obj/item/clothing/under/dress/plaid_red = 10,
 		/obj/item/clothing/under/dress/plaid_blue = 10,
 		/obj/item/clothing/under/greaser = 10,
+		/obj/item/clothing/under/sl_suit = 10,
 		)
 	contraband = list(
 		/obj/item/clothing/under/syndicate/tacticool = 5,
@@ -2124,6 +2134,7 @@ var/global/num_vending_terminals = 1
 	contraband = list(
 		/obj/item/clothing/shoes/jackboots = 5,
 		/obj/item/clothing/shoes/orange = 5,
+		/obj/item/clothing/shoes/laceup = 5,
 		)
 	premium = list(
 		/obj/item/clothing/shoes/rainbow = 1,
@@ -2288,11 +2299,12 @@ var/global/num_vending_terminals = 1
 	icon_state = DISCOUNT
 	products = list(
 		/obj/item/weapon/reagent_containers/food/snacks/discountchocolate = 6,
-		/obj/item/weapon/reagent_containers/food/snacks/danitos =6,
+		/obj/item/weapon/reagent_containers/food/snacks/danitos = 6,
 		/obj/item/weapon/reagent_containers/food/snacks/discountburger = 6,
 		/obj/item/weapon/reagent_containers/food/drinks/discount_ramen = 6,
 		/obj/item/weapon/reagent_containers/food/snacks/discountburrito = 6,
 		/obj/item/weapon/reagent_containers/food/snacks/pie/discount = 6,
+		/obj/item/weapon/reagent_containers/food/drinks/discount_sauce = 12
 		)
 	contraband = list(
 		/obj/item/weapon/reagent_containers/pill/antitox = 10
@@ -2304,7 +2316,8 @@ var/global/num_vending_terminals = 1
 		/obj/item/weapon/reagent_containers/food/drinks/discount_ramen = 2,
 		/obj/item/weapon/reagent_containers/food/snacks/discountburrito = 10,
 		/obj/item/weapon/reagent_containers/food/snacks/pie/discount = 8,
-		/obj/item/weapon/reagent_containers/pill/antitox = 10
+		/obj/item/weapon/reagent_containers/pill/antitox = 10,
+		/obj/item/weapon/reagent_containers/food/drinks/discount_sauce = 1
 		)
 
 	pack = /obj/structure/vendomatpack/discount
@@ -2396,6 +2409,14 @@ var/global/num_vending_terminals = 1
 	icon_state = "voxseed"
 	products = list (
 		/obj/item/weapon/storage/fancy/donut_box = 2,
+		/obj/item/clothing/suit/storage/trader = 3,
+		/obj/item/device/pda/trader = 3,
+		/obj/item/weapon/capsule = 60
+		)
+	prices = list(
+		/obj/item/clothing/suit/storage/trader = 100,
+		/obj/item/device/pda/trader = 100,
+		/obj/item/weapon/capsule = 10
 		)
 
 /obj/machinery/vending/trader/New()
@@ -2405,14 +2426,15 @@ var/global/num_vending_terminals = 1
 
 	premium = list(
 		/obj/item/weapon/storage/trader_marauder,
-		/obj/item/weapon/storage/backpack/holding,
+		//obj/item/weapon/storage/backpack/holding, //Players did exactly what you would expect and bought them for their own use.  Keep in mind that an obj should be good but not so good they want it for themselves
 		/obj/item/weapon/reagent_containers/glass/beaker/bluespace,
 		/obj/item/weapon/storage/bluespace_crystal,
 		//obj/item/clothing/shoes/magboots/elite,
 		/obj/item/weapon/reagent_containers/food/snacks/borer_egg,
 		/obj/item/weapon/reagent_containers/glass/bottle/peridaxon,
 		/obj/item/weapon/reagent_containers/glass/bottle/rezadone,
-		/obj/item/weapon/reagent_containers/glass/bottle/nanobotssmall,	
+		/obj/item/weapon/reagent_containers/glass/bottle/nanobotssmall,
+		/obj/item/clothing/shoes/clown_shoes/advanced,
 		)
 
 	for(var/random_items = 1 to premium.len - 4)

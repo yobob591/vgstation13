@@ -61,6 +61,8 @@ var/datum/controller/gameticker/ticker
 		"sound/music/whatisthissong.ogg",
 		"sound/music/space_asshole.ogg",
 		"sound/music/starman.ogg",
+		"sound/music/dawsonschristian.ogg",
+		"sound/music/carmenmirandasghost.ogg",
 		))
 	login_music = fcopy_rsc(oursong)
 
@@ -222,6 +224,8 @@ var/datum/controller/gameticker/ticker
 		statistic_cycle() // Polls population totals regularly and stores them in an SQL DB -- TLE
 
 	stat_collection.round_start_time = world.realtime
+	spawn(5 MINUTES) // poll every 5 minutes
+		population_poll_loop()
 
 	wageSetup()
 
@@ -230,7 +234,7 @@ var/datum/controller/gameticker/ticker
 /datum/controller/gameticker
 	//station_explosion used to be a variable for every mob's hud. Which was a waste!
 	//Now we have a general cinematic centrally held within the gameticker....far more efficient!
-	var/obj/screen/cinematic = null
+	var/obj/abstract/screen/cinematic = null
 
 	//Plus it provides an easy way to make cinematics for other events. Just use this as a template :)
 /datum/controller/gameticker/proc/station_explosion_cinematic(var/station_missed=0, var/override = null)
